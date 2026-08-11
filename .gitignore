@@ -68,3 +68,10 @@ Thumbs.db
 .prisma/
 /src/generated/
 
+# AI Assistants & Agent Skills
+.agents/
+.claude/
+.windsurf/
+skills-lock.json
+
+
