@@ -1,0 +1,27 @@
+{
+  "name": "url-shortening-service",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/dat-nnguyen/url-shortener.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "bugs": {
+    "url": "https://github.com/dat-nnguyen/url-shortener/issues"
+  },
+  "homepage": "https://github.com/dat-nnguyen/url-shortener#readme",
+  "dependencies": {
+    "prisma": "^7.9.1"
+  },
+  "devDependencies": {
+    "@types/node": "^26.2.0"
+  }
+}
