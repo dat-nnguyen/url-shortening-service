@@ -5,4 +5,16 @@ generator client {
 
 datasource db {
   provider = "postgresql"
+  url      = env("DATABASE_URL")
 }
+
+model Url {
+  id          BigInt      @id @default(autoincrement())
+  originalUrl String
+  shortCode   String   @unique
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([shortCode])
+}
+
