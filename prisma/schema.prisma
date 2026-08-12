@@ -10,11 +10,12 @@ datasource db {
 
 model Url {
   id          BigInt      @id @default(autoincrement())
-  originalUrl String
+  originalUrl String  
   shortCode   String   @unique
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 
   @@index([shortCode])
+  @@index([originalUrl])
 }
 
