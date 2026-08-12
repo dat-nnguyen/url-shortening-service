@@ -8,14 +8,27 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+model User {
+  id        BigInt   @id @default(autoincrement())
+  email     String   @unique
+  password  String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  urls      Url[]
+}
+
 model Url {
-  id          BigInt      @id @default(autoincrement())
-  originalUrl String  
+  id          BigInt   @id @default(autoincrement())
+  originalUrl String
   shortCode   String   @unique
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 
+  // Foreign key pointing to User (optional for anonymous URL creation)
+  userId      BigInt?
+  user        User?    @relation(fields: [userId], references: [id], onDelete: SetNull)
+
   @@index([shortCode])
   @@index([originalUrl])
 }
-
