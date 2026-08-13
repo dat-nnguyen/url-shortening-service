@@ -3,10 +3,11 @@ import { createUrlShortening, getOriginalUrl } from './url.service.js';
 /**
  * Handles URL shortening requests (POST /api/shorten).
  *
- * Validates the `originalUrl` format, calls the service layer to persist the record and generate
- * a Base62 short code, then returns a `201 Created` HTTP response with the short code and full URL.
+ * Validates the `originalUrl` format, extracts `userId` from `req.user` if authenticated via optional JWT,
+ * calls the service layer to persist the record and generate a Base62 short code, then returns a `201 Created`
+ * HTTP response with the short code and full URL.
  *
- * @param {import('express').Request} req - Express request object, expecting `{ originalUrl: string }` in `req.body`.
+ * @param {import('express').Request} req - Express request object, expecting `{ originalUrl: string }` in `req.body` and optional `req.user`.
  * @param {import('express').Response} res - Express response object.
  * @returns {Promise<import('express').Response>} JSON response containing shortened URL details or an error payload.
  */
@@ -24,7 +25,8 @@ export async function shortenUrl(req, res) {
             return res.status(400).json({ error: 'Invalid URL provided.' });
         }
 
-        const urlRecord = await createUrlShortening(originalUrl);
+        const userId = req.user?.id ?? null;
+        const urlRecord = await createUrlShortening(originalUrl, userId);
 
         const fullShortUrl = `${req.protocol}://${req.get('host')}/${urlRecord.shortCode}`;
         return res.status(201).json({

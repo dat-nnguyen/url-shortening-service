@@ -1,14 +1,15 @@
 import { Router } from 'express';
 import { shortenUrl, redirectToOriginalUrl } from './url.controller.js';
+import { authenticateOptional } from '../../middleware/auth.middleware.js';
 
 const router = Router();
 
 /**
  * @route   POST /shorten
- * @desc    Validates and shortens a given long URL into a Base62 short code.
- * @access  Public
+ * @desc    Validates and shortens a given long URL into a Base62 short code. Supports optional JWT auth.
+ * @access  Public / Optional Auth
  */
-router.post('/shorten', shortenUrl);
+router.post('/shorten', authenticateOptional, shortenUrl);
 
 /**
  * @route   GET /:shortCode
