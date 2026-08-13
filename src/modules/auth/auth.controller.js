@@ -1,4 +1,5 @@
 import { registerUser, loginUser } from './auth.service.js';
+import { AppError } from '../../utils/errors.js';
 
 /**
  * Controller to handle user registration (POST /api/auth/register).
@@ -18,8 +19,8 @@ export async function register(req, res) {
         await registerUser(email, password);
         return res.status(201).json({ message: 'User registered successfully.' });
     } catch (error) {
-        if (error.message === 'Email is already existed.') {
-            return res.status(400).json({ error: error.message });
+        if (error instanceof AppError) {
+            return res.status(error.statusCode).json({ error: error.message });
         }
         console.error('Error in register controller:', error);
         return res.status(500).json({ error: 'Internal server error.' });
@@ -44,8 +45,8 @@ export async function login(req, res) {
         const token = await loginUser(email, password);
         return res.status(200).json({ token });
     } catch (error) {
-        if (error.message === 'Invalid email or password') {
-            return res.status(401).json({ error: error.message });
+        if (error instanceof AppError) {
+            return res.status(error.statusCode).json({ error: error.message });
         }
         console.error('Error in login controller:', error);
         return res.status(500).json({ error: 'Internal server error.' });

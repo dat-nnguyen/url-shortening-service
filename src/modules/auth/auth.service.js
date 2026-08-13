@@ -1,6 +1,7 @@
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
 import prisma from '../../config/prisma.js';
+import { ConflictError, UnauthorizedError } from '../../utils/errors.js';
 
 /**
  * Registers a new user with an encrypted password.
@@ -11,14 +12,14 @@ import prisma from '../../config/prisma.js';
  * @param {string} email - User's email address.
  * @param {string} password - User's plain text password.
  * @returns {Promise<boolean>} Resolves to `true` on successful registration.
- * @throws {Error} If the email already exists or a database error occurs.
+ * @throws {ConflictError} If the email already exists in the database.
  */
 export async function registerUser(email, password) {
     try {
         const existingUser = await prisma.user.findUnique({ where: { email } });
 
         if (existingUser) {
-            throw new Error('Email is already existed.');
+            throw new ConflictError('Email is already existed.');
         }
 
         const hashedPassword = await bcrypt.hash(password, 10);
@@ -46,20 +47,21 @@ export async function registerUser(email, password) {
  * @param {string} email - User's registered email address.
  * @param {string} password - User's plain text password.
  * @returns {Promise<string>} Signed JSON Web Token (JWT) string.
- * @throws {Error} If credentials are invalid or `JWT_SECRET` is missing.
+ * @throws {UnauthorizedError} If credentials are invalid.
+ * @throws {Error} If `JWT_SECRET` is missing.
  */
 export async function loginUser(email, password) {
     try {
         const user = await prisma.user.findUnique({ where: { email } });
 
         if (!user) {
-            throw new Error('Invalid email or password');
+            throw new UnauthorizedError('Invalid email or password');
         }
 
         const isPasswordMatch = await bcrypt.compare(password, user.password);
 
         if (!isPasswordMatch) {
-            throw new Error('Invalid email or password');
+            throw new UnauthorizedError('Invalid email or password');
         }
 
         if (!process.env.JWT_SECRET) {
