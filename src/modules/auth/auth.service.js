@@ -1,6 +1,7 @@
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
 import prisma from '../../config/prisma.js';
+import { env } from '../../config/env.js';
 import { ConflictError, UnauthorizedError } from '../../utils/errors.js';
 
 /**
@@ -42,13 +43,12 @@ export async function registerUser(email, password) {
  * Authenticates a user and issues a signed JWT access token.
  *
  * Verifies email existence and compares the plain text password against the hashed password.
- * Generates a JWT token signed with `process.env.JWT_SECRET`.
+ * Generates a JWT token signed with `env.JWT_SECRET`.
  *
  * @param {string} email - User's registered email address.
  * @param {string} password - User's plain text password.
  * @returns {Promise<string>} Signed JSON Web Token (JWT) string.
  * @throws {UnauthorizedError} If credentials are invalid.
- * @throws {Error} If `JWT_SECRET` is missing.
  */
 export async function loginUser(email, password) {
     try {
@@ -64,14 +64,10 @@ export async function loginUser(email, password) {
             throw new UnauthorizedError('Invalid email or password');
         }
 
-        if (!process.env.JWT_SECRET) {
-            throw new Error('JWT_SECRET is not defined in environment variables.');
-        }
-
         const token = jwt.sign(
             { id: user.id.toString(), email: user.email },
-            process.env.JWT_SECRET,
-            { expiresIn: process.env.JWT_EXPIRES_IN || '1h' }
+            env.JWT_SECRET,
+            { expiresIn: env.JWT_EXPIRES_IN }
         );
 
         return token;

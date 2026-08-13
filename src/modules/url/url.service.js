@@ -88,3 +88,33 @@ export async function getOriginalUrl(shortCode) {
         userId: record.userId ? record.userId.toString() : null,
     };
 }
+
+/**
+ * Retrieves all shortened URL records owned by a specific user (ordered by most recent first).
+ *
+ * @param {number|string|bigint} userId - The user ID to query.
+ * @returns {Promise<Array<{ id: string, originalUrl: string, shortCode: string, userId: string|null, createdAt: Date }>>} Array of URL records.
+ */
+export async function getUserUrls(userId) {
+    if (userId === null || userId === undefined) {
+        return [];
+    }
+
+    let userBigIntId;
+    try {
+        userBigIntId = BigInt(userId);
+    } catch (err) {
+        return [];
+    }
+
+    const records = await prisma.url.findMany({
+        where: { userId: userBigIntId },
+        orderBy: { createdAt: 'desc' },
+    });
+
+    return records.map((record) => ({
+        ...record,
+        id: record.id.toString(),
+        userId: record.userId ? record.userId.toString() : null,
+    }));
+}

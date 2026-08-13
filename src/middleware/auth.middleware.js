@@ -1,4 +1,5 @@
 import jwt from 'jsonwebtoken';
+import { env } from '../config/env.js';
 
 /**
  * Optional Authentication Middleware.
@@ -25,7 +26,7 @@ export function authenticateOptional(req, res, next) {
     const token = authHeader.split(' ')[1];
 
     try {
-        const decodedToken = jwt.verify(token, process.env.JWT_SECRET);
+        const decodedToken = jwt.verify(token, env.JWT_SECRET);
         req.user = decodedToken;
     } catch (error) {
         req.user = null;
@@ -58,7 +59,7 @@ export function authenticateStrict(req, res, next) {
     const token = authHeader.split(' ')[1];
 
     try {
-        const decodedToken = jwt.verify(token, process.env.JWT_SECRET);
+        const decodedToken = jwt.verify(token, env.JWT_SECRET);
         req.user = decodedToken;
         return next();
     } catch (error) {
