@@ -1,8 +1,7 @@
 services:
-  # Node.js Express Application (Private, accessible only via Nginx)
+  # Node.js Express Application (Stateless, scalable to N replicas behind Nginx)
   app:
     build: .
-    container_name: url_shortener_app
     restart: always
     environment:
       NODE_ENV: ${NODE_ENV:-development}
@@ -57,7 +56,7 @@ services:
     networks:
       - app-network
 
-  # Nginx Reverse Proxy (Public Entry Point)
+  # Nginx Reverse Proxy (Public Entry Point & Load Balancer)
   nginx:
     image: nginx:alpine
     container_name: url_shortener_nginx
