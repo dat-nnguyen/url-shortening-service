@@ -74,4 +74,5 @@ Thumbs.db
 .windsurf/
 skills-lock.json
 
-
+# Local documentation / milestones
+MILESTONE.md
