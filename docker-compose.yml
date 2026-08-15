@@ -10,6 +10,7 @@ services:
       REDIS_URL: ${REDIS_URL:-redis://redis:6379}
       JWT_SECRET: ${JWT_SECRET:-your_jwt_secret_key_change_in_production}
       JWT_EXPIRES_IN: ${JWT_EXPIRES_IN:-1h}
+      WORKER_ID: ${WORKER_ID:-}
     depends_on:
       postgres:
         condition: service_healthy

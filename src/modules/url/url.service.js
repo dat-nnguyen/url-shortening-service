@@ -1,5 +1,6 @@
 import prisma from '../../config/prisma.js';
 import redis from '../../config/redis.js';
+import snowflake from '../../utils/snowflake.js';
 import { encode } from './base62.js';
 
 /**
@@ -27,14 +28,14 @@ const NULL_CACHE_TTL_SECONDS = 60;
 const getCacheKey = (shortCode) => `url:${shortCode}`;
 
 /**
- * Creates a shortened URL record linked optionally to a user account.
+ * Creates a shortened URL record linked optionally to a user account using 64-bit Snowflake ID generation.
  * 
- * Flow:
- * 1. Converts `userId` to `BigInt` if provided.
+ * Optimized Flow:
+ * 1. Validates input and converts `userId` to `BigInt` if provided.
  * 2. Checks for existing URL for the user to prevent duplicate entries.
- * 3. Inserts the record with a temporary shortCode to reserve the auto-increment `id` (BigInt).
- * 4. Encodes `id` into Base62 (`shortCode = encode(id)`).
- * 5. Updates the database record with the generated `shortCode`.
+ * 3. Generates a unique 64-bit Snowflake ID (`snowflake.nextId()`).
+ * 4. Encodes the Snowflake ID into Base62 (`shortCode = encode(id)`).
+ * 5. Executes a single atomic INSERT in PostgreSQL with both `id` and `shortCode` upfront.
  * 6. Stores the created record in Redis cache for instant lookups.
  *
  * @param {string} originalUrl - The original long URL.
@@ -77,32 +78,27 @@ export async function createUrlShortening(originalUrl, userId = null) {
         return normalizedExisting;
     }
 
-    // 1. Create record with temporary shortCode to obtain auto-increment ID
-    const tempCode = `temp_${Date.now()}_${Math.random().toString(36).substring(2, 7)}`;
-    const urlRecord = await prisma.url.create({
+    // 1. Generate unique 64-bit Snowflake ID and Base62 shortCode
+    const id = snowflake.nextId();
+    const shortCode = encode(id);
+
+    // 2. Single atomic database INSERT
+    const createdRecord = await prisma.url.create({
         data: {
+            id,
             originalUrl,
-            shortCode: tempCode,
+            shortCode,
             userId: userBigIntId,
         },
     });
 
-    // 2. Generate Base62 shortCode from auto-increment BigInt ID
-    const shortCode = encode(urlRecord.id);
-
-    // 3. Update record with final shortCode
-    const updatedRecord = await prisma.url.update({
-        where: { id: urlRecord.id },
-        data: { shortCode },
-    });
-
     const normalizedRecord = {
-        ...updatedRecord,
-        id: updatedRecord.id.toString(),
-        userId: updatedRecord.userId ? updatedRecord.userId.toString() : null,
+        ...createdRecord,
+        id: createdRecord.id.toString(),
+        userId: createdRecord.userId ? createdRecord.userId.toString() : null,
     };
 
-    // 4. Populate Redis Cache
+    // 3. Populate Redis Cache
     try {
         await redis.set(
             getCacheKey(shortCode),

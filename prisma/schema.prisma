@@ -17,7 +17,7 @@ model User {
 }
 
 model Url {
-  id          BigInt   @id @default(autoincrement())
+  id          BigInt   @id
   originalUrl String
   shortCode   String   @unique
   createdAt   DateTime @default(now())

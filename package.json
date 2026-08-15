@@ -1,26 +1,30 @@
 {
   "name": "url-shortening-service",
   "version": "1.0.0",
-  "description": "URL Shortening Service",
+  "description": "Distributed URL Shortener & Analytics Service",
   "main": "src/app.js",
   "type": "module",
   "scripts": {
     "dev": "nodemon src/app.js",
     "build": "prisma generate",
     "start": "node src/app.js",
+    "test": "node --test tests/**/*.test.js",
     "prisma:generate": "prisma generate"
   },
   "repository": {
     "type": "git",
     "url": "git+https://github.com/dat-nnguyen/url-shortener.git"
   },
-  "keywords": [],
+  "keywords": [
+    "url-shortener",
+    "snowflake",
+    "redis",
+    "postgresql",
+    "nginx",
+    "express"
+  ],
   "author": "",
   "license": "ISC",
-  "bugs": {
-    "url": "https://github.com/dat-nnguyen/url-shortener/issues"
-  },
-  "homepage": "https://github.com/dat-nnguyen/url-shortener#readme",
   "dependencies": {
     "@prisma/adapter-pg": "^7.9.1",
     "@prisma/client": "^7.9.1",
@@ -30,7 +34,9 @@
     "ioredis": "^6.0.0",
     "jsonwebtoken": "^9.0.3",
     "pg": "^8.23.0",
-    "prisma": "^7.9.1"
+    "prisma": "^7.9.1",
+    "swagger-jsdoc": "^6.3.0",
+    "swagger-ui-express": "^5.0.1"
   },
   "devDependencies": {
     "@types/node": "^26.2.0",
