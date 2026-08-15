@@ -25,6 +25,22 @@ setupSwagger(app);
 
 /**
  * @openapi
+ * /:
+ *   get:
+ *     summary: Root Landing & Documentation Redirect
+ *     description: Redirects browser requests to interactive Swagger documentation at /api-docs.
+ *     tags:
+ *       - System
+ *     responses:
+ *       302:
+ *         description: Redirects to /api-docs.
+ */
+app.get('/', (req, res) => {
+    res.redirect('/api-docs');
+});
+
+/**
+ * @openapi
  * /health:
  *   get:
  *     summary: Cluster Health & Instance Diagnostics
