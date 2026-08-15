@@ -5,7 +5,7 @@
 [![Redis](https://img.shields.io/badge/Redis-7-red.svg)](https://redis.io/)
 [![Prisma](https://img.shields.io/badge/Prisma-7-indigo.svg)](https://www.prisma.io/)
 [![Nginx](https://img.shields.io/badge/Nginx-Reverse%20Proxy-brightgreen.svg)](https://nginx.org/)
-[![Swagger](https://img.shields.io/badge/OpenAPI-3.0%20Swagger-green.svg)](http://localhost/api-docs/)
+[![Swagger](https://img.shields.io/badge/OpenAPI-3.0%20Swagger-green.svg)](#-api-documentation--swagger-ui)
 [![License: ISC](https://img.shields.io/badge/License-ISC-yellow.svg)](LICENSE)
 
 A high-performance, containerized, horizontally scalable URL shortening and analytics platform engineered with **Node.js (ESM), PostgreSQL, Redis, Twitter Snowflake, and Nginx**.
@@ -14,7 +14,7 @@ A high-performance, containerized, horizontally scalable URL shortening and anal
 
 ## 🏛️ System Architecture
 
-```
+```text
                                ┌────────────────────────────────────────┐
                                │         External HTTP Traffic          │
                                └───────────────────┬────────────────────┘
@@ -49,6 +49,7 @@ A high-performance, containerized, horizontally scalable URL shortening and anal
 ## 🔬 Core System Design Decisions
 
 ### 1. 64-bit Twitter Snowflake ID Generation vs. Database Auto-Increment
+
 - **Decentralized Generation**: Eliminates sequence table locks, allowing each application worker to generate IDs independently.
 - **Strictly Monotonic**: Time-ordered IDs provide high database B-tree index locality.
 - **64-bit Binary Layout**:
@@ -59,20 +60,24 @@ A high-performance, containerized, horizontally scalable URL shortening and anal
 - **Automatic Replica Derivation**: Dynamic Docker Compose containers deterministically derive their 10-bit Worker ID from their unique container `HOSTNAME` hash.
 
 ### 2. Bijective Base62 Encoding Engine
+
 - **URL-Safe Alphabet**: `[a-z][A-Z][0-9]` ($62\text{ characters}$) producing compact, readable slugs (e.g. `A3hLagSQ4i`).
 - **Native BigInt Operations**: Prevents 64-bit precision truncation issues common with standard JavaScript numbers.
 - **$O(1)$ Decoding**: Uses a pre-computed ASCII map for instant reverse lookups.
 
 ### 3. Redis Cache-Aside with Penetration Protection
+
 - **Cache-Aside Redirection**: High-frequency short URLs are cached in Redis under `url:${shortCode}` with a **24-hour TTL (`EX 86400`)**, bypassing PostgreSQL for sub-millisecond 302 redirects.
 - **Cache Penetration Protection (Null Sentinel)**: Requests for non-existent codes cache a `__NULL__` sentinel with a **60-second TTL**, shielding PostgreSQL from malicious 404 flooding attacks.
 
 ### 4. Atomic Lua Script Rate Limiting
+
 - **Single-Cycle Atomicity**: Evaluates `INCR` + conditional `EXPIRE` + `TTL` in a single Redis engine cycle via `EVAL`, eliminating fixed-window race conditions.
 - **Proxy-Aware Client IP Extraction**: Safely extracts real client IPs via `req.headers['x-real-ip']` forwarded by Nginx.
 - **Standard HTTP Rate Limit Headers**: Injects `X-RateLimit-Limit`, `X-RateLimit-Remaining`, `X-RateLimit-Reset`, and `Retry-After`.
 
 ### 5. Horizontal Scalability & Zero-State Node Clusters
+
 - **Stateless Containers**: All application state resides in Redis and PostgreSQL, allowing $N$ identical Node.js containers to run concurrently.
 - **Host Port Isolation**: Node containers are private to the internal Docker network; all public traffic enters via Nginx on port `80`.
 - **Dynamic DNS Load Balancing**: Nginx resolves Docker's embedded DNS (`127.0.0.11`) to distribute traffic evenly across replicas using Round-Robin.
@@ -123,10 +128,9 @@ A high-performance, containerized, horizontally scalable URL shortening and anal
 
 ---
 
-## 📚 API Reference & Swagger UI
+## 📚 API Documentation & Swagger UI
 
-Interactive Swagger documentation is available at:
-👉 **[http://localhost/api-docs/](http://localhost/api-docs/)**
+Interactive Swagger documentation is served at the `/api-docs` route on your deployment (with raw OpenAPI JSON specification available at `/api-docs.json`).
 
 ### Endpoints Overview
 
@@ -134,7 +138,7 @@ Interactive Swagger documentation is available at:
 | :--- | :--- | :--- | :--- | :--- |
 | `POST` | `/shorten` | Shorten a long URL to Base62 | 15 req/min | Optional Bearer JWT |
 | `GET` | `/:shortCode` | Redirect to original long URL (302) | — | Public |
-| `POST` | `/api/auth/register`| Register new user account | 5 req/min | Public |
+| `POST` | `/api/auth/register` | Register new user account | 5 req/min | Public |
 | `POST` | `/api/auth/login` | Authenticate user & get JWT | 5 req/min | Public |
 | `GET` | `/health` | Cluster diagnostics & Worker ID | — | Public |
 
@@ -143,12 +147,15 @@ Interactive Swagger documentation is available at:
 ### Example API Usage
 
 #### 1. Shorten a URL
+
 ```bash
 curl -i -X POST http://localhost/shorten \
   -H "Content-Type: application/json" \
   -d '{"originalUrl": "https://github.com/dat-nnguyen/url-shortening-service"}'
 ```
+
 **Response (`201 Created`)**:
+
 ```json
 {
   "originalUrl": "https://github.com/dat-nnguyen/url-shortening-service",
@@ -159,20 +166,26 @@ curl -i -X POST http://localhost/shorten \
 ```
 
 #### 2. Resolve & Redirect
+
 ```bash
 curl -i http://localhost/A3hLagSQ4i
 ```
+
 **Response (`302 Found`)**:
+
 ```http
 HTTP/1.1 302 Found
 Location: https://github.com/dat-nnguyen/url-shortening-service
 ```
 
 #### 3. Health Check & Node Identification
+
 ```bash
 curl -s http://localhost/health | jq .
 ```
+
 **Response (`200 OK`)**:
+
 ```json
 {
   "status": "OK",
@@ -187,10 +200,12 @@ curl -s http://localhost/health | jq .
 ## 🚀 Getting Started
 
 ### Prerequisites
+
 - [Docker](https://www.docker.com/) & [Docker Compose](https://docs.docker.com/compose/)
 - [Node.js](https://nodejs.org/) v20+ (for local development/testing)
 
 ### 1. Clone & Configure
+
 ```bash
 git clone https://github.com/dat-nnguyen/url-shortener.git
 cd url-shortener
@@ -198,12 +213,14 @@ cp .env.example .env
 ```
 
 ### 2. Launch Scaled Multi-Replica Stack
+
 ```bash
 # Starts PostgreSQL, Redis, Nginx, and 3 scaled Node instances
 docker compose up --build --scale app=3 -d
 ```
 
 ### 3. Run Automated Tests
+
 ```bash
 npm test
 ```
@@ -224,4 +241,5 @@ npm test
 ---
 
 ## 📜 License
+
 This project is open-source and licensed under the [ISC License](LICENSE).
