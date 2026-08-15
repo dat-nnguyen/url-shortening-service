@@ -1,0 +1,44 @@
+# Render Infrastructure-as-Code Blueprint Specification
+# Deploy with 1-click on https://render.com/
+services:
+  # Node.js Web Application Service
+  - type: web
+    name: url-shortening-service
+    runtime: node
+    plan: free
+    region: oregon
+    buildCommand: npm install && npm run render:build
+    startCommand: npm start
+    healthCheckPath: /health
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: DATABASE_URL
+        fromDatabase:
+          name: urlshortener-postgres
+          property: connectionString
+      - key: REDIS_URL
+        fromService:
+          type: redis
+          name: urlshortener-redis
+          property: connectionString
+      - key: JWT_SECRET
+        generateValue: true
+      - key: JWT_EXPIRES_IN
+        value: 7d
+
+  # Managed Redis Cache Instance
+  - type: redis
+    name: urlshortener-redis
+    plan: free
+    region: oregon
+    maxmemoryPolicy: allkeys-lru
+    ipAllowList: []
+
+databases:
+  # Managed PostgreSQL Database
+  - name: urlshortener-postgres
+    plan: free
+    region: oregon
+    databaseName: urlshortener
+    user: postgres

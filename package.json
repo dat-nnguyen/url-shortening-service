@@ -7,9 +7,11 @@
   "scripts": {
     "dev": "nodemon src/app.js",
     "build": "prisma generate",
+    "render:build": "prisma generate && prisma db push",
     "start": "node src/app.js",
     "test": "node --test tests/**/*.test.js",
-    "prisma:generate": "prisma generate"
+    "prisma:generate": "prisma generate",
+    "db:push": "prisma db push"
   },
   "repository": {
     "type": "git",
