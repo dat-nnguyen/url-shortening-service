@@ -41,4 +41,4 @@ databases:
     plan: free
     region: oregon
     databaseName: urlshortener
-    user: postgres
+    user: urlshortener_user
