@@ -1,14 +1,17 @@
 # ⚡ Distributed URL Shortener & Analytics Platform
 
+[![Roadmap.sh](https://img.shields.io/badge/Roadmap.sh-Project%20Spec-blue.svg)](https://roadmap.sh/projects/url-shortening-service)
+[![Live Demo](https://img.shields.io/badge/Live%20Demo-Render-blueviolet.svg)](https://url-shortening-service-pbuw.onrender.com/api-docs/#/)
 [![Node.js](https://img.shields.io/badge/Node.js-v20+-green.svg)](https://nodejs.org/)
 [![PostgreSQL](https://img.shields.io/badge/PostgreSQL-16-blue.svg)](https://www.postgresql.org/)
 [![Redis](https://img.shields.io/badge/Redis-7-red.svg)](https://redis.io/)
 [![Prisma](https://img.shields.io/badge/Prisma-7-indigo.svg)](https://www.prisma.io/)
 [![Nginx](https://img.shields.io/badge/Nginx-Reverse%20Proxy-brightgreen.svg)](https://nginx.org/)
-[![Swagger](https://img.shields.io/badge/OpenAPI-3.0%20Swagger-green.svg)](#-api-documentation--swagger-ui)
 [![License: ISC](https://img.shields.io/badge/License-ISC-yellow.svg)](LICENSE)
 
 A high-performance, containerized, horizontally scalable URL shortening and analytics platform engineered with **Node.js (ESM), PostgreSQL, Redis, Twitter Snowflake, and Nginx**.
+
+Built according to the [Roadmap.sh URL Shortening Service Project](https://roadmap.sh/projects/url-shortening-service).
 
 ---
 
@@ -130,6 +133,8 @@ A high-performance, containerized, horizontally scalable URL shortening and anal
 
 ## 📚 API Documentation & Swagger UI
 
+👉 **Live Interactive Swagger UI**: [url-shortening-service-pbuw.onrender.com/api-docs/#/](https://url-shortening-service-pbuw.onrender.com/api-docs/#/)
+
 Interactive Swagger documentation is served at the `/api-docs` route on your deployment (with raw OpenAPI JSON specification available at `/api-docs.json`).
 
 ### Endpoints Overview
@@ -149,18 +154,18 @@ Interactive Swagger documentation is served at the `/api-docs` route on your dep
 #### 1. Shorten a URL
 
 ```bash
-curl -i -X POST http://localhost/shorten \
+curl -i -X POST https://url-shortening-service-pbuw.onrender.com/shorten \
   -H "Content-Type: application/json" \
-  -d '{"originalUrl": "https://github.com/dat-nnguyen/url-shortening-service"}'
+  -d '{"originalUrl": "https://roadmap.sh/projects/url-shortening-service"}'
 ```
 
 **Response (`201 Created`)**:
 
 ```json
 {
-  "originalUrl": "https://github.com/dat-nnguyen/url-shortening-service",
+  "originalUrl": "https://roadmap.sh/projects/url-shortening-service",
   "shortCode": "A3hLagSQ4i",
-  "shortUrl": "http://localhost/A3hLagSQ4i",
+  "shortUrl": "https://url-shortening-service-pbuw.onrender.com/A3hLagSQ4i",
   "createdAt": "2026-08-15T08:58:13.487Z"
 }
 ```
@@ -168,20 +173,20 @@ curl -i -X POST http://localhost/shorten \
 #### 2. Resolve & Redirect
 
 ```bash
-curl -i http://localhost/A3hLagSQ4i
+curl -i https://url-shortening-service-pbuw.onrender.com/A3hLagSQ4i
 ```
 
 **Response (`302 Found`)**:
 
 ```http
 HTTP/1.1 302 Found
-Location: https://github.com/dat-nnguyen/url-shortening-service
+Location: https://roadmap.sh/projects/url-shortening-service
 ```
 
 #### 3. Health Check & Node Identification
 
 ```bash
-curl -s http://localhost/health | jq .
+curl -s https://url-shortening-service-pbuw.onrender.com/health | jq .
 ```
 
 **Response (`200 OK`)**:
